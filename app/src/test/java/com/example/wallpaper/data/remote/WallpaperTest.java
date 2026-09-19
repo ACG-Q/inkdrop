@@ -7,7 +7,8 @@ public class WallpaperTest {
     @Test
     public void testGetFullUrl() {
         Wallpaper wallpaper = new Wallpaper(1, "/api/images/test.jpg", "hash", 1080, 1920, "2024-01-01");
-        String fullUrl = wallpaper.getFullUrl("https://example.com");
+        String fullUrl = com.example.wallpaper.util.ImageUrlUtil.buildImageUrl(
+            "https://example.com", wallpaper.getUrl(), "");
         assertEquals("https://example.com/api/images/test.jpg", fullUrl);
     }
     
