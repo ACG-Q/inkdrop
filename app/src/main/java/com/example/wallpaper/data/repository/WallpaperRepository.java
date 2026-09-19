@@ -10,37 +10,57 @@ import com.example.wallpaper.data.local.WallpaperDao;
 import com.example.wallpaper.data.local.WallpaperEntity;
 import com.example.wallpaper.data.remote.Wallpaper;
 import com.example.wallpaper.data.remote.WallpaperResponse;
+import com.example.wallpaper.data.source.WallpaperLoadManager;
 import com.example.wallpaper.data.source.WallpaperSource;
 import com.example.wallpaper.data.source.WallpaperSourceManager;
+import com.example.wallpaper.di.AppModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * 壁纸数据仓库
+ * 统一管理壁纸数据的获取、缓存和存储
+ */
 @Singleton
 public class WallpaperRepository {
     private final WallpaperSourceManager sourceManager;
     private final WallpaperDao wallpaperDao;
+    private final WallpaperLoadManager loadManager;
     private final ExecutorService executor;
     private final Handler mainHandler;
 
     @Inject
-    public WallpaperRepository(WallpaperSourceManager sourceManager, WallpaperDao wallpaperDao) {
+    public WallpaperRepository(
+            WallpaperSourceManager sourceManager,
+            WallpaperDao wallpaperDao,
+            @Named(AppModule.IO_EXECUTOR) ExecutorService executor) {
         this.sourceManager = sourceManager;
         this.wallpaperDao = wallpaperDao;
-        this.executor = Executors.newFixedThreadPool(4);
+        this.loadManager = new WallpaperLoadManager();
+        this.executor = executor;
         this.mainHandler = new Handler(Looper.getMainLooper());
     }
 
+    public void init(android.content.Context context) {
+        sourceManager.init(context);
+    }
+
     public LiveData<Resource<List<Wallpaper>>> getWallpapers(String sourceId, int page, int pageSize) {
+        return getWallpapers(sourceId, page, pageSize, null);
+    }
+
+    public LiveData<Resource<List<Wallpaper>>> getWallpapers(String sourceId, int page, int pageSize, java.util.Map<String, String> categoryParams) {
         MutableLiveData<Resource<List<Wallpaper>>> result = new MutableLiveData<>();
         
         WallpaperSource source = sourceId != null ? 
@@ -64,7 +84,7 @@ public class WallpaperRepository {
         // 网络请求
         result.setValue(Resource.loading(null));
         
-        source.getWallpapers(page, pageSize).enqueue(new Callback<WallpaperResponse>() {
+        source.getWallpapers(page, pageSize, categoryParams).enqueue(new Callback<WallpaperResponse>() {
             @Override
             public void onResponse(Call<WallpaperResponse> call, Response<WallpaperResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -89,6 +109,50 @@ public class WallpaperRepository {
         });
         
         return result;
+    }
+
+    public void loadBatch(String sourceId, Map<String, String> categoryParams,
+                          int page, int pageSize, WallpaperLoadManager.LoadCallback callback) {
+        WallpaperSource source = sourceId != null ?
+            sourceManager.getSource(sourceId) :
+            sourceManager.getDefaultSource();
+
+        if (source == null || !source.isAvailable()) {
+            callback.onError("壁纸源不可用");
+            return;
+        }
+
+        WallpaperLoadManager.LoadCallback wrappedCallback = new WallpaperLoadManager.LoadCallback() {
+            @Override
+            public void onWallpaperLoaded(Wallpaper wallpaper) {
+                // 保存到Room
+                executor.execute(() -> {
+                    WallpaperEntity entity = new WallpaperEntity(
+                        wallpaper.getId(), wallpaper.getUrl(), "",
+                        wallpaper.getWidth(), wallpaper.getHeight(),
+                        "", false, sourceId, System.currentTimeMillis()
+                    );
+                    wallpaperDao.insertAll(java.util.Collections.singletonList(entity));
+                });
+                callback.onWallpaperLoaded(wallpaper);
+            }
+
+            @Override
+            public void onAllLoaded(boolean hasMore) {
+                callback.onAllLoaded(hasMore);
+            }
+
+            @Override
+            public void onError(String error) {
+                callback.onError(error);
+            }
+        };
+
+        loadManager.loadBatch(source, sourceId, categoryParams, page, pageSize, wrappedCallback);
+    }
+
+    public void clearUrlCache(String sourceId) {
+        loadManager.clearUrlCache(sourceId);
     }
 
     public LiveData<List<WallpaperEntity>> getFavoriteWallpapers() {
@@ -128,8 +192,10 @@ public class WallpaperRepository {
     }
 
     private Wallpaper convertSingleToDomain(WallpaperEntity entity) {
-        return new Wallpaper(entity.getId(), entity.getUrl(), entity.getHash(),
+        Wallpaper wallpaper = new Wallpaper(entity.getId(), entity.getUrl(), entity.getHash(),
             entity.getWidth(), entity.getHeight(), entity.getCreatedAt());
+        wallpaper.setFavorite(entity.isFavorite());
+        return wallpaper;
     }
 
     private List<WallpaperEntity> convertToEntity(List<Wallpaper> wallpapers, String sourceId) {

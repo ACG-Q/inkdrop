@@ -10,17 +10,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.wallpaper.R;
+import com.example.wallpaper.util.image.ImageLoader;
 import com.example.wallpaper.data.remote.Wallpaper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.WallpaperViewHolder> {
     private List<Wallpaper> wallpapers = new ArrayList<>();
+    private Set<String> urlSet = new HashSet<>();
     private OnItemClickListener listener;
     private OnFavoriteClickListener favoriteListener;
 
@@ -41,18 +42,53 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
     }
 
     public void setWallpapers(List<Wallpaper> newWallpapers) {
-        this.wallpapers = newWallpapers;
+        this.wallpapers.clear();
+        this.urlSet.clear();
+        for (Wallpaper w : newWallpapers) {
+            if (urlSet.add(w.getUrl())) {
+                this.wallpapers.add(w);
+            }
+        }
         notifyDataSetChanged();
     }
 
     public void addWallpapers(List<Wallpaper> moreWallpapers) {
         int startPos = wallpapers.size();
-        wallpapers.addAll(moreWallpapers);
-        notifyItemRangeInserted(startPos, moreWallpapers.size());
+        for (Wallpaper w : moreWallpapers) {
+            if (urlSet.add(w.getUrl())) {
+                wallpapers.add(w);
+            }
+        }
+        int added = wallpapers.size() - startPos;
+        if (added > 0) {
+            notifyItemRangeInserted(startPos, added);
+        }
+    }
+
+    public void addWallpaper(Wallpaper wallpaper) {
+        if (urlSet.add(wallpaper.getUrl())) {
+            wallpapers.add(wallpaper);
+            notifyItemInserted(wallpapers.size() - 1);
+        }
     }
 
     public void clear() {
+        int size = wallpapers.size();
         wallpapers.clear();
+        urlSet.clear();
+        if (size > 0) {
+            notifyItemRangeRemoved(0, size);
+        }
+    }
+
+    public void clearAndSet(List<Wallpaper> newWallpapers) {
+        wallpapers.clear();
+        urlSet.clear();
+        for (Wallpaper w : newWallpapers) {
+            if (urlSet.add(w.getUrl())) {
+                wallpapers.add(w);
+            }
+        }
         notifyDataSetChanged();
     }
 
@@ -88,16 +124,28 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
         }
 
         void bind(Wallpaper wallpaper) {
-            // 加载图片
-            Glide.with(itemView.getContext())
-                .load("https://inkpaper.foolstack.net" + wallpaper.getUrl())
-                .transform(new CenterCrop(), new RoundedCorners(16))
-                .into(wallpaperImage);
+            int width = wallpaper.getWidth();
+            int height = wallpaper.getHeight();
 
-            // 显示尺寸
-            wallpaperSize.setText(wallpaper.getWidth() + " x " + wallpaper.getHeight());
+            if (width > 0 && height > 0) {
+                ViewGroup.LayoutParams lp = wallpaperImage.getLayoutParams();
+                int containerWidth = itemView.getResources().getDisplayMetrics().widthPixels / 2 - 12;
+                lp.height = (int) (containerWidth * ((float) height / width));
+                wallpaperImage.setLayoutParams(lp);
+            } else {
+                ViewGroup.LayoutParams lp = wallpaperImage.getLayoutParams();
+                lp.height = 300;
+                wallpaperImage.setLayoutParams(lp);
+            }
 
-            // 点击事件
+            ImageLoader.load(wallpaperImage, wallpaper.getUrl());
+
+            if (width > 0 && height > 0) {
+                wallpaperSize.setText(width + " x " + height);
+            } else {
+                wallpaperSize.setText("未知尺寸");
+            }
+
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemClick(wallpaper);
@@ -106,9 +154,16 @@ public class WallpaperAdapter extends RecyclerView.Adapter<WallpaperAdapter.Wall
 
             btnFavorite.setOnClickListener(v -> {
                 if (favoriteListener != null) {
-                    favoriteListener.onFavoriteClick(wallpaper, true);
+                    boolean newState = !wallpaper.isFavorite();
+                    wallpaper.setFavorite(newState);
+                    notifyItemChanged(getAdapterPosition());
+                    favoriteListener.onFavoriteClick(wallpaper, newState);
                 }
             });
+
+            btnFavorite.setImageResource(wallpaper.isFavorite() 
+                ? R.drawable.ic_favorite_filled 
+                : R.drawable.ic_favorite_border);
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.wallpaper.data.source;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SourceConfig {
@@ -10,6 +12,7 @@ public class SourceConfig {
     private final boolean enabled;
     private final int priority;
     private final Map<String, String> extraConfig;
+    private final List<WallpaperCategory> categories;
 
     private SourceConfig(Builder builder) {
         this.sourceId = builder.sourceId;
@@ -18,6 +21,7 @@ public class SourceConfig {
         this.enabled = builder.enabled;
         this.priority = builder.priority;
         this.extraConfig = builder.extraConfig;
+        this.categories = builder.categories;
     }
 
     public String getSourceId() { return sourceId; }
@@ -26,6 +30,7 @@ public class SourceConfig {
     public boolean isEnabled() { return enabled; }
     public int getPriority() { return priority; }
     public Map<String, String> getExtraConfig() { return extraConfig; }
+    public List<WallpaperCategory> getCategories() { return categories; }
 
     public static class Builder {
         private String sourceId;
@@ -34,6 +39,7 @@ public class SourceConfig {
         private boolean enabled = true;
         private int priority = 1;
         private Map<String, String> extraConfig = new HashMap<>();
+        private List<WallpaperCategory> categories = new ArrayList<>();
 
         public Builder sourceId(String sourceId) {
             this.sourceId = sourceId;
@@ -62,6 +68,11 @@ public class SourceConfig {
 
         public Builder extraConfig(Map<String, String> extraConfig) {
             this.extraConfig = extraConfig;
+            return this;
+        }
+
+        public Builder categories(List<WallpaperCategory> categories) {
+            this.categories = categories;
             return this;
         }
 

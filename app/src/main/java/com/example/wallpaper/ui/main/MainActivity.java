@@ -1,14 +1,13 @@
 package com.example.wallpaper.ui.main;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.example.wallpaper.R;
-import com.example.wallpaper.ui.favorite.FavoriteActivity;
 import com.example.wallpaper.ui.gallery.GalleryFragment;
+import com.example.wallpaper.ui.mine.MineFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -40,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.navigation_gallery) {
                 loadFragment(new GalleryFragment());
                 return true;
-            } else if (itemId == R.id.navigation_favorite) {
-                startActivity(new Intent(this, FavoriteActivity.class));
+            } else if (itemId == R.id.navigation_mine) {
+                loadFragment(new MineFragment());
                 return true;
             }
             return false;

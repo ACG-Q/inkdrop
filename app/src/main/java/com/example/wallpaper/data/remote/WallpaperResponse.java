@@ -19,9 +19,18 @@ public class WallpaperResponse {
     @SerializedName("totalPages")
     private int totalPages;
 
+    public WallpaperResponse() {
+    }
+
     public List<Wallpaper> getData() { return data; }
     public int getPage() { return page; }
     public int getPageSize() { return pageSize; }
     public int getTotal() { return total; }
     public int getTotalPages() { return totalPages; }
+
+    public void setData(List<Wallpaper> data) { this.data = data; }
+    public void setPage(int page) { this.page = page; }
+    public void setPageSize(int pageSize) { this.pageSize = pageSize; }
+    public void setTotal(int total) { this.total = total; }
+    public void setTotalPages(int totalPages) { this.totalPages = totalPages; }
 }

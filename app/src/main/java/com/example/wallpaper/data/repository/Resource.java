@@ -35,4 +35,5 @@ public class Resource<T> {
     public boolean isSuccess() { return status == Status.SUCCESS; }
     public boolean isError() { return status == Status.ERROR; }
     public boolean isLoading() { return status == Status.LOADING; }
+    public boolean isEmpty() { return data == null; }
 }

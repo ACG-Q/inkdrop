@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
 }
 
+apply plugin: 'com.google.dagger.hilt.android'
+
 android {
     namespace 'com.example.wallpaper'
     compileSdk 34
@@ -62,6 +64,9 @@ dependencies {
     
     // WorkManager
     implementation 'androidx.work:work-runtime:2.9.0'
+    
+    // Rhino JS Engine (Android compatible version)
+    implementation 'org.mozilla:rhino-runtime:1.7.15'
     
     // Test
     testImplementation 'junit:junit:4.13.2'

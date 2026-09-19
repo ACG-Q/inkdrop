@@ -5,15 +5,14 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
+import com.example.wallpaper.util.ToastUtils;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterInside;
 import com.example.wallpaper.R;
+import com.example.wallpaper.util.image.ImageLoader;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -87,11 +86,9 @@ public class DetailActivity extends AppCompatActivity {
         
         viewModel.getWallpaper().observe(this, resource -> {
             if (resource.isSuccess()) {
-                String imageUrl = "https://inkpaper.foolstack.net" + resource.getData().getUrl();
-                Glide.with(this)
-                    .load(imageUrl)
-                    .transform(new CenterInside())
-                    .into(wallpaperFull);
+                // URL 已经在数据层处理完整，直接使用
+                String imageUrl = resource.getData().getUrl();
+                ImageLoader.load(wallpaperFull, imageUrl);
             }
         });
         
@@ -102,7 +99,7 @@ public class DetailActivity extends AppCompatActivity {
         });
         
         viewModel.getMessage().observe(this, message -> {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            ToastUtils.show(message);
         });
         
         viewModel.getIsLoading().observe(this, isLoading -> {

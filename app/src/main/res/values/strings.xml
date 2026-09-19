@@ -2,6 +2,7 @@
     <string name="app_name">墨纸壁纸</string>
     <string name="gallery">图库</string>
     <string name="favorite">收藏</string>
+    <string name="mine">我的</string>
     <string name="settings">设置</string>
     <string name="download">下载</string>
     <string name="share">分享</string>

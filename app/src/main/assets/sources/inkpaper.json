@@ -1,0 +1,16 @@
+{
+  "sourceId": "inkpaper",
+  "sourceName": "InkPaper壁纸",
+  "url": "https://inkpaper.foolstack.net/api/wallpapers?page={page}&pageSize={pageSize}",
+  "response": {
+    "list": "data",
+    "item": {
+      "id": "id",
+      "url": "url",
+      "width": "width",
+      "height": "height"
+    }
+  },
+  "imageUrlBase": "https://inkpaper.foolstack.net",
+  "previewSuffix": "?format=webp&w=600&q=85&fit=cover"
+}

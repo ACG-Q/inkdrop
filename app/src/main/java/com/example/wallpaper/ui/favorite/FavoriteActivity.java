@@ -11,8 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wallpaper.R;
+import com.example.wallpaper.data.local.WallpaperEntity;
+import com.example.wallpaper.data.remote.Wallpaper;
 import com.example.wallpaper.ui.detail.DetailActivity;
 import com.example.wallpaper.ui.gallery.WallpaperAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -42,6 +47,11 @@ public class FavoriteActivity extends AppCompatActivity {
     private void initViews() {
         recyclerView = findViewById(R.id.recycler_view);
         tvEmpty = findViewById(R.id.tv_empty);
+
+        TextView btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
     }
 
     private void setupRecyclerView() {
@@ -54,21 +64,38 @@ public class FavoriteActivity extends AppCompatActivity {
             intent.putExtra("wallpaper_id", wallpaper.getId());
             startActivity(intent);
         });
+
+        adapter.setOnFavoriteClickListener((wallpaper, isFavorite) -> {
+            viewModel.removeFavorite(wallpaper.getId());
+        });
     }
 
     private void observeViewModel() {
         viewModel = new ViewModelProvider(this).get(FavoriteViewModel.class);
         
-        viewModel.getFavorites().observe(this, favorites -> {
-            if (favorites == null || favorites.isEmpty()) {
+        viewModel.getUiState().observe(this, state -> {
+            if (state.isLoading()) {
+                tvEmpty.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.GONE);
+            } else if (state.isError() || state.getData() == null || state.getData().isEmpty()) {
                 tvEmpty.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
             } else {
                 tvEmpty.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
-                // 将 WallpaperEntity 转换为 Wallpaper 显示
-                // adapter.setWallpapers(favorites); // 需要转换
+                adapter.setWallpapers(convertToWallpapers(state.getData()));
             }
         });
+    }
+
+    private List<Wallpaper> convertToWallpapers(List<WallpaperEntity> entities) {
+        List<Wallpaper> wallpapers = new ArrayList<>();
+        for (WallpaperEntity entity : entities) {
+            Wallpaper wp = new Wallpaper(entity.getId(), entity.getUrl(), entity.getHash(),
+                entity.getWidth(), entity.getHeight(), entity.getCreatedAt());
+            wp.setFavorite(true);
+            wallpapers.add(wp);
+        }
+        return wallpapers;
     }
 }

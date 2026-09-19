@@ -33,6 +33,11 @@
         
         <activity android:name=".ui.detail.DetailActivity" />
         <activity android:name=".ui.favorite.FavoriteActivity" />
+        <activity android:name=".ui.source.SourceManageActivity" />
+        <activity android:name=".ui.source.SourceDetailActivity" />
+        <activity android:name=".ui.source.JsonFieldPickerActivity" />
+        <activity android:name=".ui.source.JsEditorActivity" />
+        <activity android:name=".ui.log.LogViewerActivity" />
         
     </application>
 

@@ -21,6 +21,8 @@ public class Wallpaper {
     @SerializedName("createdAt")
     private String createdAt;
 
+    private boolean isFavorite;
+
     public Wallpaper(int id, String url, String hash, int width, int height, String createdAt) {
         this.id = id;
         this.url = url;
@@ -36,8 +38,8 @@ public class Wallpaper {
     public int getWidth() { return width; }
     public int getHeight() { return height; }
     public String getCreatedAt() { return createdAt; }
-
-    public String getFullUrl(String baseUrl) {
-        return baseUrl + url;
-    }
+    public boolean isFavorite() { return isFavorite; }
+    public void setFavorite(boolean favorite) { isFavorite = favorite; }
+    public void setWidth(int width) { this.width = width; }
+    public void setHeight(int height) { this.height = height; }
 }

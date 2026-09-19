@@ -3,37 +3,35 @@ package com.example.wallpaper.ui.detail;
 import android.app.Application;
 import android.app.WallpaperManager;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Environment;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.example.wallpaper.R;
 import com.example.wallpaper.data.remote.Wallpaper;
 import com.example.wallpaper.data.repository.Resource;
 import com.example.wallpaper.data.repository.WallpaperRepository;
+import com.example.wallpaper.di.AppModule;
+import com.example.wallpaper.ui.common.SingleLiveEvent;
+import com.example.wallpaper.util.image.ImageDownloader;
+import com.example.wallpaper.util.image.WallpaperSetter;
+import com.example.wallpaper.util.image.ImageCallback;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
+/**
+ * 壁纸详情 ViewModel
+ * 处理壁纸加载、下载、分享、设置等操作
+ */
 @HiltViewModel
 public class DetailViewModel extends AndroidViewModel {
     private final WallpaperRepository repository;
@@ -41,16 +39,19 @@ public class DetailViewModel extends AndroidViewModel {
     
     private final MutableLiveData<Resource<Wallpaper>> wallpaper = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>(false);
-    private final MutableLiveData<String> message = new MutableLiveData<>();
+    private final SingleLiveEvent<String> message = new SingleLiveEvent<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     
     private String currentImageUrl;
 
     @Inject
-    public DetailViewModel(@NonNull Application application, WallpaperRepository repository) {
+    public DetailViewModel(
+            @NonNull Application application,
+            WallpaperRepository repository,
+            @Named(AppModule.IO_EXECUTOR) ExecutorService executor) {
         super(application);
         this.repository = repository;
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = executor;
     }
 
     public LiveData<Resource<Wallpaper>> getWallpaper() {
@@ -61,7 +62,7 @@ public class DetailViewModel extends AndroidViewModel {
         return isFavorite;
     }
 
-    public LiveData<String> getMessage() {
+    public SingleLiveEvent<String> getMessage() {
         return message;
     }
 
@@ -75,7 +76,8 @@ public class DetailViewModel extends AndroidViewModel {
             isLoading.setValue(false);
             if (resource.isSuccess()) {
                 wallpaper.setValue(resource);
-                currentImageUrl = "https://inkpaper.foolstack.net" + resource.getData().getUrl();
+                // URL 已经在数据层处理完整，直接使用
+                currentImageUrl = resource.getData().getUrl();
             } else {
                 message.setValue(resource.getMessage());
             }
@@ -90,56 +92,19 @@ public class DetailViewModel extends AndroidViewModel {
         
         isLoading.setValue(true);
         
-        Glide.with(getApplication())
-            .asBitmap()
-            .load(currentImageUrl)
-            .listener(new RequestListener<Bitmap>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, 
-                    Target<Bitmap> target, boolean isFirstResource) {
-                    isLoading.setValue(false);
-                    message.setValue("下载失败");
-                    return false;
-                }
+        ImageDownloader.downloadToWallpapers(currentImageUrl, new ImageCallback.DownloadCallback() {
+            @Override
+            public void onSuccess(File file) {
+                isLoading.setValue(false);
+                message.setValue(getApplication().getString(R.string.download_success));
+            }
 
-                @Override
-                public boolean onResourceReady(Bitmap resource, Object model, 
-                    Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                    executor.execute(() -> {
-                        boolean saved = saveBitmap(resource);
-                        isLoading.setValue(false);
-                        message.setValue(saved ? 
-                            getApplication().getString(R.string.download_success) :
-                            getApplication().getString(R.string.download_failed));
-                    });
-                    return false;
-                }
-            })
-            .submit();
-    }
-
-    private boolean saveBitmap(Bitmap bitmap) {
-        File directory = new File(Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES), "Wallpapers");
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-        
-        File file = new File(directory, "wallpaper_" + System.currentTimeMillis() + ".jpg");
-        
-        try (OutputStream out = new FileOutputStream(file)) {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            
-            // 通知媒体库扫描
-            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            mediaScanIntent.setData(Uri.fromFile(file));
-            getApplication().sendBroadcast(mediaScanIntent);
-            
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+            @Override
+            public void onError(String errorMsg) {
+                isLoading.setValue(false);
+                message.setValue(getApplication().getString(R.string.download_failed));
+            }
+        });
     }
 
     public void shareWallpaper() {
@@ -148,37 +113,22 @@ public class DetailViewModel extends AndroidViewModel {
             return;
         }
         
-        Glide.with(getApplication())
-            .asBitmap()
-            .load(currentImageUrl)
-            .listener(new RequestListener<Bitmap>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, 
-                    Target<Bitmap> target, boolean isFirstResource) {
-                    message.setValue("加载失败");
-                    return false;
-                }
+        ImageDownloader.downloadToCache(currentImageUrl, new ImageCallback.DownloadCallback() {
+            @Override
+            public void onSuccess(File file) {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("image/*");
+                shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                getApplication().startActivity(Intent.createChooser(shareIntent, 
+                    getApplication().getString(R.string.share)));
+            }
 
-                @Override
-                public boolean onResourceReady(Bitmap resource, Object model, 
-                    Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                    File file = new File(getApplication().getCacheDir(), "share_image.jpg");
-                    try (OutputStream out = new FileOutputStream(file)) {
-                        resource.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                        
-                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                        shareIntent.setType("image/*");
-                        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        getApplication().startActivity(Intent.createChooser(shareIntent, 
-                            getApplication().getString(R.string.share)));
-                    } catch (IOException ex) {
-                        message.setValue("分享失败");
-                    }
-                    return false;
-                }
-            })
-            .submit();
+            @Override
+            public void onError(String errorMsg) {
+                message.setValue("分享失败");
+            }
+        });
     }
 
     public void setWallpaper(int type) {
@@ -189,36 +139,28 @@ public class DetailViewModel extends AndroidViewModel {
         
         isLoading.setValue(true);
         
-        Glide.with(getApplication())
-            .asBitmap()
-            .load(currentImageUrl)
-            .listener(new RequestListener<Bitmap>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, 
-                    Target<Bitmap> target, boolean isFirstResource) {
-                    isLoading.setValue(false);
-                    message.setValue("设置失败");
-                    return false;
-                }
+        WallpaperSetter.WallpaperType wallpaperType;
+        if (type == (WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK)) {
+            wallpaperType = WallpaperSetter.WallpaperType.BOTH;
+        } else if (type == WallpaperManager.FLAG_LOCK) {
+            wallpaperType = WallpaperSetter.WallpaperType.LOCK_SCREEN;
+        } else {
+            wallpaperType = WallpaperSetter.WallpaperType.HOME_SCREEN;
+        }
+        
+        WallpaperSetter.set(currentImageUrl, wallpaperType, new ImageCallback.SetWallpaperCallback() {
+            @Override
+            public void onSuccess() {
+                isLoading.setValue(false);
+                message.setValue(getApplication().getString(R.string.set_wallpaper_success));
+            }
 
-                @Override
-                public boolean onResourceReady(Bitmap resource, Object model, 
-                    Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                    executor.execute(() -> {
-                        try {
-                            WallpaperManager wallpaperManager = WallpaperManager.getInstance(getApplication());
-                            wallpaperManager.setBitmap(resource, null, true, type);
-                            isLoading.setValue(false);
-                            message.setValue(getApplication().getString(R.string.set_wallpaper_success));
-                        } catch (IOException e) {
-                            isLoading.setValue(false);
-                            message.setValue(getApplication().getString(R.string.set_wallpaper_failed));
-                        }
-                    });
-                    return false;
-                }
-            })
-            .submit();
+            @Override
+            public void onError(String errorMsg) {
+                isLoading.setValue(false);
+                message.setValue(getApplication().getString(R.string.set_wallpaper_failed));
+            }
+        });
     }
 
     public void setFavorite(boolean favorite) {
