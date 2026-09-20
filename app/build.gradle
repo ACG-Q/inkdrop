@@ -5,11 +5,11 @@ plugins {
 apply plugin: 'com.google.dagger.hilt.android'
 
 android {
-    namespace 'com.example.wallpaper'
+    namespace 'io.inkdrop.wallpaper'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.wallpaper"
+        applicationId "io.inkdrop.wallpaper"
         minSdk 21
         targetSdk 34
         versionCode 1
