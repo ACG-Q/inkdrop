@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
 
@@ -96,7 +96,7 @@ jobs:
           fi
 
       - name: Upload APK to Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: InkDrop-Wallpaper
           path: ${{ steps.find-apk.outputs.apk_path }}
