@@ -12,9 +12,9 @@
 </p>
 
 <p align="center">
-  <a href="链接1"><img src="https://img.shields.io/badge/Android-5.0%2B-brightgreen" alt="Android 5.0+"></a>
-  <a href="链接2"><img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version 1.0.0"></a>
-  <a href="链接3"><img src="https://img.shields.io/badge/License-MIT-orange" alt="License MIT"></a>
+  <a href="https://github.com/ACG-Q/inkdrop/releases"><img src="https://img.shields.io/badge/Android-5.0%2B-brightgreen" alt="Android 5.0+"></a>
+  <a href="https://github.com/ACG-Q/inkdrop/releases"><img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version 1.0.0"></a>
+  <a href="https://github.com/ACG-Q/inkdrop/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-orange" alt="License MIT"></a>
 </p>
 
 ---
