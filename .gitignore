@@ -23,3 +23,8 @@ logcat*.txt
 *.png
 *.jpg
 *.jpeg
+
+# 但保留 docs 目录下的图片
+!docs/*.png
+!docs/*.jpg
+!docs/*.jpeg
