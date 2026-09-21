@@ -1,47 +1,69 @@
-# 墨纸壁纸 InkDrop
+<p align="center">
+  <a href="https://github.com/ACG-Q/inkdrop">
+    <img src="https://githubcard.com/ACG-Q/inkdrop.svg" alt="GitHub Card">
+  </a>
+</p>
 
-一款专为墨水屏设计的 Android 壁纸应用。
+<h1 align="center">墨纸壁纸</h1>
 
-## 特性
+<p align="center">
+  <strong>InkDrop Wallpaper</strong><br>
+  一款专为墨水屏设计的 Android 壁纸应用
+</p>
 
-- 纯黑白界面，适配墨水屏显示
-- 支持自定义壁纸源（JSON / JS 脚本）
-- 壁纸预览、下载、分享、设为桌面
-- 收藏管理
-- 自动保存功能
-- 运行日志查看
+<p align="center">
+  <a href="链接1"><img src="https://img.shields.io/badge/Android-5.0%2B-brightgreen" alt="Android 5.0+"></a>
+  <a href="链接2"><img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version 1.0.0"></a>
+  <a href="链接3"><img src="https://img.shields.io/badge/License-MIT-orange" alt="License MIT"></a>
+</p>
+
+---
+
+## 功能特性
+
+- **纯黑白界面** — 专为墨水屏优化，低功耗显示
+- **壁纸源管理** — 支持 JSON / JS 脚本自定义壁纸源
+- **壁纸操作** — 预览、下载、分享、设为桌面/锁屏
+- **收藏管理** — 一键收藏喜欢的壁纸
+- **自动保存** — 设为壁纸时自动保存原图到相册
+- **运行日志** — 实时查看应用运行状态
+
+## 预览
+
+| 图库 | 详情 | 设置 |
+| :---: | :---: | :---: |
+| ![图库](docs/screenshot-home.png) | ![详情](docs/screenshot-detail.png) | ![设置](docs/screenshot-settings.png) |
 
 ## 技术栈
 
-- 原生 Java Android
-- Hilt 依赖注入
-- Retrofit + OkHttp 网络请求
-- Glide 图片加载
-- Room 本地数据库
-- Rhino JS 引擎（动态壁纸源解析）
-- WorkManager 后台任务
+| 模块 | 技术 |
+|------|------|
+| 语言 | Java |
+| 依赖注入 | Hilt |
+| 网络请求 | Retrofit + OkHttp |
+| 图片加载 | Glide |
+| 本地数据库 | Room |
+| JS 引擎 | Rhino |
+| 后台任务 | WorkManager |
 
 ## 构建
 
 ```bash
 # Debug 构建
-.\gradlew.bat assembleDebug
+./gradlew assembleDebug
 
 # Release 构建（需要签名配置）
-.\gradlew.bat assembleRelease
-```
+./gradlew assembleRelease
 
-## 安装到设备
-
-```bash
-.\gradlew.bat installDebug
+# 安装到设备
+./gradlew installDebug
 ```
 
 ## CI/CD
 
-推送到 `master` 分支或创建 `v*` 标签会自动触发 GitHub Actions 构建，APK 上传到 Artifacts。
+推送到 `master` 或创建 `v*` 标签自动触发 GitHub Actions，APK 上传到 Artifacts。
 
-### 环境变量（GitHub Secrets）
+**GitHub Secrets 配置：**
 
 | 变量名 | 说明 |
 |--------|------|
@@ -50,6 +72,33 @@
 | `KEY_ALIAS` | 密钥别名 |
 | `KEY_PASSWORD` | 密钥密码 |
 
+## 下载
+
+从 [Releases](https://github.com/ACG-Q/inkdrop/releases) 下载最新 APK。
+
+## 贡献指南
+
+欢迎提交 Issue 和 Pull Request。
+
+### 本地开发
+
+```bash
+# 克隆项目
+git clone https://github.com/ACG-Q/inkdrop.git
+
+# 使用 Android Studio 打开项目
+# 或命令行构建
+./gradlew assembleDebug
+```
+
+## 致谢
+
+- Hilt — 依赖注入框架
+- Retrofit — 网络请求库
+- Glide — 图片加载库
+- Room — 本地数据库
+- Rhino — JavaScript 引擎
+
 ## 许可证
 
-MIT License
+[MIT License](LICENSE)
