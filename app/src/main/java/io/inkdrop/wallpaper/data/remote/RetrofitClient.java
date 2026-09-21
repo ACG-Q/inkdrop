@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import io.inkdrop.wallpaper.BuildConfig;
 
 public class RetrofitClient {
     private static final int TIMEOUT = 30;
@@ -19,7 +20,7 @@ public class RetrofitClient {
     
     private static HttpLoggingInterceptor createLoggingInterceptor() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        interceptor.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
         return interceptor;
     }
     
