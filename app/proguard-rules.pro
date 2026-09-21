@@ -49,6 +49,9 @@
 # Rhino JS Engine
 -keep class org.mozilla.javascript.** { *; }
 -keep class org.mozilla.classfile.** { *; }
+-dontwarn java.beans.**
+-dontwarn javax.xml.**
+-dontwarn org.mozilla.javascript.**
 
 # Keep data classes for Gson
 -keep class io.inkdrop.wallpaper.data.remote.** { *; }
