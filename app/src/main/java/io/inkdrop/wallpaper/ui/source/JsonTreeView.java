@@ -142,7 +142,7 @@ public class JsonTreeView extends LinearLayout {
         }
         tvValue.setText(displayValue);
         tvValue.setTextSize(13);
-        tvValue.setTextColor(0xFF666666);
+        tvValue.setTextColor(getContext().getColor(R.color.text_secondary));
 
         row.addView(tvKey);
         row.addView(tvValue);

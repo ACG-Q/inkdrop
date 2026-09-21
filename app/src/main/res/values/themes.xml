@@ -4,10 +4,40 @@
         <item name="colorPrimary">@color/white</item>
         <item name="colorPrimaryVariant">@color/white</item>
         <item name="colorSecondary">@color/black</item>
+        <item name="colorAccent">@color/black</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorControlNormal">@color/black</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/black</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="android:statusBarColor">@color/white</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/white</item>
         <item name="android:windowLightNavigationBar">true</item>
+        <item name="dialogTheme">@style/Theme.InkPaperWallpaper.Dialog</item>
+        <item name="alertDialogTheme">@style/Theme.InkPaperWallpaper.Dialog</item>
+        <item name="android:timePickerDialogTheme">@style/Theme.InkPaperWallpaper.Dialog</item>
+        <item name="colorControlHighlight">@color/black</item>
+        <item name="android:progressBarStyleHorizontal">@style/Theme.InkPaperWallpaper.ProgressBar</item>
+    </style>
+
+    <style name="Theme.InkPaperWallpaper.Dialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="colorAccent">@color/black</item>
+        <item name="colorPrimary">@color/black</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Theme.InkPaperWallpaper.Dialog.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Theme.InkPaperWallpaper.Dialog.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Theme.InkPaperWallpaper.Dialog.Button</item>
+    </style>
+
+    <style name="Theme.InkPaperWallpaper.Dialog.Button" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/black</item>
+        <item name="rippleColor">@color/black</item>
+        <item name="strokeColor">@color/black</item>
+    </style>
+
+    <style name="Theme.InkPaperWallpaper.ProgressBar">
+        <item name="android:indeterminateTint">@color/black</item>
+        <item name="android:progressTint">@color/black</item>
     </style>
 </resources>

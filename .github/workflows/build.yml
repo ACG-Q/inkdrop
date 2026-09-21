@@ -1,0 +1,112 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup keystore
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding keystore from secrets..."
+            echo "$KEYSTORE_BASE64" | base64 -d > "$HOME/release-key.jks"
+          else
+            echo "No KEYSTORE_BASE64 secret found, generating temporary keystore..."
+            keytool -genkeypair -v \
+              -keystore "$HOME/release-key.jks" \
+              -alias inkdrop \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass android -keypass android \
+              -dname "CN=CI,OU=CI,O=CI,L=Unknown,ST=Unknown,C=CN"
+          fi
+          echo "KEYSTORE_FILE=$HOME/release-key.jks" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD:-android}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=${KEY_ALIAS:-inkdrop}" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${KEY_PASSWORD:-android}" >> $GITHUB_ENV
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Extract version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+
+      - name: Update version in build.gradle
+        if: steps.version.outputs.version != ''
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Extract versionCode (major * 10000 + minor * 100 + patch)
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          PATCH=$(echo $VERSION | cut -d. -f3)
+          VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+          
+          echo "Updating to version $VERSION (code: $VERSION_CODE)"
+          
+          # Update build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"$VERSION\"/" app/build.gradle
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+        env:
+          KEYSTORE_FILE: ${{ env.KEYSTORE_FILE }}
+          KEYSTORE_PASSWORD: ${{ env.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ env.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ env.KEY_PASSWORD }}
+
+      - name: Find APK
+        id: find-apk
+        run: |
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            echo "apk_path=app/build/outputs/apk/release/app-release.apk" >> $GITHUB_OUTPUT
+          else
+            echo "apk_path=app/build/outputs/apk/release/app-release-unsigned.apk" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload APK to Artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: InkDrop-Wallpaper
+          path: ${{ steps.find-apk.outputs.apk_path }}
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.find-apk.outputs.apk_path }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false

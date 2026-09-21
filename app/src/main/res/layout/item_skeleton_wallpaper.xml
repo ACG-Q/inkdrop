@@ -1,40 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout 
+<com.google.android.material.card.MaterialCardView 
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    android:orientation="vertical"
-    android:background="@drawable/card_background"
-    android:elevation="2dp">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@drawable/skeleton_bg" />
+    app:cardCornerRadius="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@android:color/black"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
         <View
-            android:layout_width="80dp"
-            android:layout_height="14dp"
-            android:background="@drawable/skeleton_bg" />
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@color/skeleton_bg" />
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical">
 
-        <View
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/skeleton_bg" />
+            <View
+                android:layout_width="80dp"
+                android:layout_height="14dp"
+                android:background="@color/skeleton_bg" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <View
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@color/skeleton_bg" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

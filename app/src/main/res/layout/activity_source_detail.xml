@@ -23,7 +23,7 @@
             android:textColor="@color/black"
             android:clickable="true"
             android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless" />
+            android:background="@drawable/bg_back_button" />
 
         <TextView
             android:id="@+id/tv_title"
@@ -52,7 +52,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:background="@color/black" />
 
     <ScrollView
@@ -242,7 +242,7 @@
                     android:layout_height="wrap_content"
                     android:text="支持 {page} {pageSize} 占位符"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_url_template"
@@ -288,7 +288,7 @@
                     android:layout_height="wrap_content"
                     android:text="数据列表字段名"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_data_field"
@@ -320,7 +320,7 @@
                     android:layout_height="wrap_content"
                     android:text="ID字段"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_id_field"
@@ -339,7 +339,7 @@
                     android:layout_height="wrap_content"
                     android:text="URL字段"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_url_field"
@@ -358,7 +358,7 @@
                     android:layout_height="wrap_content"
                     android:text="宽度字段"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_width_field"
@@ -377,7 +377,7 @@
                     android:layout_height="wrap_content"
                     android:text="高度字段"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_height_field"
@@ -410,7 +410,7 @@
                     android:layout_height="wrap_content"
                     android:text="图片基础地址（相对路径时拼接用）"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_image_base_url"
@@ -429,7 +429,7 @@
                     android:layout_height="wrap_content"
                     android:text="预览图后缀"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_detail_preview_suffix"
@@ -466,7 +466,7 @@
                     android:layout_height="wrap_content"
                     android:text="302源：返回图片直链或302跳转"
                     android:textSize="11sp"
-                    android:textColor="#888888" />
+                    android:textColor="@color/black" />
 
                 <EditText
                     android:id="@+id/et_302_url"
@@ -504,7 +504,7 @@
     <!-- 底部按钮 -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:background="@color/black" />
 
     <LinearLayout

@@ -12,14 +12,29 @@ android {
         applicationId "io.inkdrop.wallpaper"
         minSdk 21
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 10000
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            def ksFile = System.getenv("KEYSTORE_FILE") ?: "release-key.jks"
+            def ksPassword = System.getenv("KEYSTORE_PASSWORD") ?: "inkdrop123"
+            def ksAlias = System.getenv("KEY_ALIAS") ?: "inkdrop"
+            def ksKeyPassword = System.getenv("KEY_PASSWORD") ?: "inkdrop123"
+            
+            storeFile file(ksFile)
+            storePassword ksPassword
+            keyAlias ksAlias
+            keyPassword ksKeyPassword
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

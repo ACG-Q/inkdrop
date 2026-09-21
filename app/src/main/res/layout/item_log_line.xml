@@ -6,4 +6,4 @@
     android:fontFamily="monospace"
     android:textSize="11sp"
     android:paddingVertical="2dp"
-    android:textColor="#CCCCCC" />
+    android:textColor="@color/black" />

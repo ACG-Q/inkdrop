@@ -1,0 +1,25 @@
+# Release keystore
+release-key.jks
+
+# Build outputs
+build/
+app/build/
+
+# IDE
+.gradle/
+.idea/
+*.iml
+local.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logcat*.txt
+
+# Screenshots
+*.png
+*.jpg
+*.jpeg

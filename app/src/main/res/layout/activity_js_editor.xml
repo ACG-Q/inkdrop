@@ -23,7 +23,7 @@
             android:textColor="@color/black"
             android:clickable="true"
             android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless" />
+            android:background="@drawable/bg_back_button" />
 
         <TextView
             android:layout_width="0dp"
@@ -52,7 +52,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:background="@color/black" />
 
     <!-- 文件名提示 -->
